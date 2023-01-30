@@ -9,6 +9,7 @@ classdef ServiceQueue < handle
         Events;
         Waiting;
         Served;
+        Log;
     end
     methods
         function obj = ServiceQueue(Time, NumServers, ArrivalRate, DepartureRate)
@@ -27,6 +28,10 @@ classdef ServiceQueue < handle
             obj.Events = PriorityQueue({}, @(x) x.Time);
             obj.Waiting = {};
             obj.Served = {};
+            obj.Log = table( ...
+                Size=[0, 4], ...
+                VariableNames={'Time', 'NWaiting', 'NInService', 'NServed'}, ...
+                VariableTypes={'double', 'int64', 'int64', 'int64'});
         end
         function schedule_event(obj, event)
             if event.Time <= obj.Time
@@ -44,6 +49,7 @@ classdef ServiceQueue < handle
             end
             obj.Time = event.Time;
             visit(event, obj);
+            record_log(obj);
         end
         function handle_arrival(obj, arrival)
             c = arrival.Customer;
@@ -86,6 +92,12 @@ classdef ServiceQueue < handle
                     begin_serving(obj, j, customer);
                 end
             end
+        end
+        function record_log(obj)
+            NumWaiting = size(obj.Waiting, 2);
+            NumInService = obj.NumServers - sum(obj.ServerAvailable);
+            NumServed = size(obj.Served, 2);
+            obj.Log(end+1, :) = {obj.Time, NumWaiting, NumInService, NumServed};
         end
     end
 end
