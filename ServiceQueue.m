@@ -9,15 +9,18 @@ classdef ServiceQueue < handle
         Events;
         Waiting;
         Served;
+        LogInterval;
         Log;
     end
     methods
-        function obj = ServiceQueue(Time, NumServers, ArrivalRate, DepartureRate)
+        function obj = ServiceQueue(Time, NumServers, ...
+                ArrivalRate, DepartureRate, LogInterval)
             arguments
                 Time = 0.0;
                 NumServers = 1;
                 ArrivalRate = 0.5;
                 DepartureRate = 0.6;
+                LogInterval = 1.0;
             end
             obj.Time = Time;
             obj.NumServers = NumServers;
@@ -32,9 +35,11 @@ classdef ServiceQueue < handle
                 Size=[0, 4], ...
                 VariableNames={'Time', 'NWaiting', 'NInService', 'NServed'}, ...
                 VariableTypes={'double', 'int64', 'int64', 'int64'});
+            obj.LogInterval = LogInterval;
+            schedule_event(obj, RecordToLog(0));
         end
         function schedule_event(obj, event)
-            if event.Time <= obj.Time
+            if event.Time < obj.Time
                 error('event happens in the past');
             end
             push(obj.Events, event);
@@ -49,7 +54,6 @@ classdef ServiceQueue < handle
             end
             obj.Time = event.Time;
             visit(event, obj);
-            record_log(obj);
         end
         function handle_arrival(obj, arrival)
             c = arrival.Customer;
@@ -92,6 +96,10 @@ classdef ServiceQueue < handle
                     begin_serving(obj, j, customer);
                 end
             end
+        end
+        function handle_record_to_log(obj, record)
+            record_log(obj);
+            schedule_event(obj, RecordToLog(obj.Time + obj.LogInterval));
         end
         function record_log(obj)
             NumWaiting = size(obj.Waiting, 2);
