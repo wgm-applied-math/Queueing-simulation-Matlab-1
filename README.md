@@ -1,6 +1,6 @@
 # Queueing-simulation-Matlab-1
 A queueing simulation in Matlab.
-I'll eventually add a Python version.
+I'll eventually add a Python version and a Java version.
 
 This is an M/M/s queue simulation.
 The overall architecture is event driven.
