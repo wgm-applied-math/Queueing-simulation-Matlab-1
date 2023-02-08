@@ -21,7 +21,7 @@ classdef ServiceQueue < handle
                 Time = 0.0;
                 NumServers = 1;
                 ArrivalRate = 0.5;
-                RenegeRate = 0.5; 
+                RenegeRate = 0.35; 
                 DepartureRate = 0.6;
                 LogInterval = 1.0;
                 
