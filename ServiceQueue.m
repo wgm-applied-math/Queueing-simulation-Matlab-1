@@ -4,33 +4,39 @@ classdef ServiceQueue < handle
         NumServers;
         InterArrivalDist;
         ServiceDist;
+        RenegDist;
         ServerAvailable;
         Servers;
         Events;
         Waiting;
         Served;
+        Reneged;
         LogInterval;
         Log;
     end
     methods
         function obj = ServiceQueue(Time, NumServers, ...
-                ArrivalRate, DepartureRate, LogInterval)
+                ArrivalRate, RenegRate, DepartureRate, LogInterval)
             arguments
                 Time = 0.0;
                 NumServers = 1;
                 ArrivalRate = 0.5;
+                RenegRate = 0.5; 
                 DepartureRate = 0.6;
                 LogInterval = 1.0;
+                
             end
             obj.Time = Time;
             obj.NumServers = NumServers;
             obj.InterArrivalDist = makedist("Exponential","mu",1/ArrivalRate);
             obj.ServiceDist = makedist("Exponential","mu",1/DepartureRate);
+            obj.RenegDist = makedist("Exponential","mu",1/RenegRate); 
             obj.ServerAvailable = repelem(true, NumServers);
             obj.Servers = cell([1, NumServers]);
             obj.Events = PriorityQueue({}, @(x) x.Time);
             obj.Waiting = {};
             obj.Served = {};
+            obj.Reneged = {};
             obj.Log = table( ...
                 Size=[0, 4], ...
                 VariableNames={'Time', 'NWaiting', 'NInService', 'NServed'}, ...
@@ -59,14 +65,28 @@ classdef ServiceQueue < handle
             c = arrival.Customer;
             c.ArrivalTime = obj.Time;
             obj.Waiting{end+1} = c;
+            %Add the renege time event
+            renege_time = random(obj.RenegeDist);
+            r = Renege(obj.Time + renege_time , c.Id);
             % Schedule next arrival...
             next_customer = Customer(c.Id + 1);
             inter_arrival_time = random(obj.InterArrivalDist);
             next_arrival = ...
                 Arrival(obj.Time + inter_arrival_time, next_customer);
             schedule_event(obj, next_arrival);
+            schedule_event(obj, r);
             advance(obj);
         end
+        function handle_renege(obj, renege)
+            for j = 1:size(obj.Waiting,2)
+                if obj.Waiting{j}.Id == renege.CustomerId
+                    obj.Reneged{end+1} = obj.Waiting{j};
+                    obj.Waiting(j) = [];
+                    break
+                end
+            end
+            advance(obj);
+          end
         function handle_departure(obj, departure)
             j = departure.ServerIndex;
             customer = obj.Servers{j};
