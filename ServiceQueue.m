@@ -4,7 +4,7 @@ classdef ServiceQueue < handle
         NumServers;
         InterArrivalDist;
         ServiceDist;
-        RenegDist;
+        RenegeDist;
         ServerAvailable;
         Servers;
         Events;
@@ -16,12 +16,12 @@ classdef ServiceQueue < handle
     end
     methods
         function obj = ServiceQueue(Time, NumServers, ...
-                ArrivalRate, RenegRate, DepartureRate, LogInterval)
+                ArrivalRate, RenegeRate, DepartureRate, LogInterval)
             arguments
                 Time = 0.0;
                 NumServers = 1;
                 ArrivalRate = 0.5;
-                RenegRate = 0.5; 
+                RenegeRate = 0.5; 
                 DepartureRate = 0.6;
                 LogInterval = 1.0;
                 
@@ -30,7 +30,7 @@ classdef ServiceQueue < handle
             obj.NumServers = NumServers;
             obj.InterArrivalDist = makedist("Exponential","mu",1/ArrivalRate);
             obj.ServiceDist = makedist("Exponential","mu",1/DepartureRate);
-            obj.RenegDist = makedist("Exponential","mu",1/RenegRate); 
+            obj.RenegeDist = makedist("Exponential","mu",1/RenegeRate); 
             obj.ServerAvailable = repelem(true, NumServers);
             obj.Servers = cell([1, NumServers]);
             obj.Events = PriorityQueue({}, @(x) x.Time);

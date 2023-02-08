@@ -13,7 +13,7 @@ classdef Renege
             obj.CustomerId = CustomerId;
         end
         function varargout = visit(obj, other)
-            [varargout{1:nargout}] = hande_renege(other, obj);
+            [varargout{1:nargout}] = handle_renege(other, obj);
         end
     end
 end
