@@ -86,7 +86,7 @@ classdef ServiceQueue < handle
         end
         function advance(obj)
             % If someone is waiting
-            if size(obj.Waiting, 2) > 0
+            if length(obj.Waiting) > 0
                 % If a server is available
                 [x, j] = max(obj.ServerAvailable);
                 if x
@@ -103,9 +103,9 @@ classdef ServiceQueue < handle
             schedule_event(obj, RecordToLog(obj.Time + obj.LogInterval));
         end
         function record_log(obj)
-            NWaiting = size(obj.Waiting, 2);
+            NWaiting = length(obj.Waiting);
             NInService = obj.NumServers - sum(obj.ServerAvailable);
-            NServed = size(obj.Served, 2);
+            NServed = length(obj.Served);
             obj.Log(end+1, :) = {obj.Time, NWaiting, NInService, NServed};
         end
     end
