@@ -1,23 +1,21 @@
-function [q, h, P] = run_ServiceQueue(max_time)
-arguments
-    max_time = 10.0;
-end
+n_samples = 100;
+max_time = 1000;
+NInSystem = [];
 
 %% Run the queue simulation
-q = ServiceQueue(LogInterval=0.05);
-q.schedule_event(Arrival(1, Customer(1)));
-while q.Time < max_time
-    handle_next_event(q);
+for sample_num = 1:n_samples
+    q = ServiceQueue(LogInterval=0.5);
+    q.schedule_event(Arrival(1, Customer(1)));
+    run_until(q, max_time);
+    % Pull out samples of the number of customers in the queue system
+    NInSystem = [NInSystem, q.Log.NWaiting + q.Log.NInService];
 end
-
-%% Pull out samples of the number of customers in the queue system
-NInSystem = q.Log.NWaiting + q.Log.NInService;
 
 %% Make a picture
 hold on;
 
 % Start with a histogram.
-h = histogram(NInSystem, Normalization="probability", BinEdges=-0.5:1:10);
+h = histogram(NInSystem, Normalization="probability", BinMethod="integers");
 
 % For comparison, plot the theoretical results for a M/M/1 queue.
 % The agreement isn't all that good unless you run for a long time, say
@@ -42,5 +40,3 @@ fig.Units = 'inches';
 screenposition = fig.Position;
 fig.PaperPosition = [0 0 screenposition(3:4)];
 fig.PaperSize = [screenposition(3:4)];
-
-end
