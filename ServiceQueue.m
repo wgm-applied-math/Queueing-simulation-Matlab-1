@@ -39,6 +39,11 @@ classdef ServiceQueue < handle
                 VariableTypes={'double', 'int64', 'int64', 'int64'});
             schedule_event(obj, RecordToLog(0));
         end
+        function obj = run_until(obj, MaxTime)
+            while obj.Time < MaxTime
+                handle_next_event(obj)
+            end
+        end
         function schedule_event(obj, event)
             if event.Time < obj.Time
                 error('event happens in the past');
