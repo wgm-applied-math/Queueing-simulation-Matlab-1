@@ -3,8 +3,12 @@ max_time = 1000;
 NInSystem = [];
 
 %% Run the queue simulation
+% The statistics seem to come out a little weird if the log interval is too
+% short, apparently because the log entries are not close enough to
+% independent. So the log interval should be long enough for several
+% arrival and departure events happen.
 for sample_num = 1:n_samples
-    q = ServiceQueue(LogInterval=0.5);
+    q = ServiceQueue(LogInterval=10);
     q.schedule_event(Arrival(1, Customer(1)));
     run_until(q, max_time);
     % Pull out samples of the number of customers in the queue system
