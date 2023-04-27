@@ -1,7 +1,12 @@
 classdef ServiceQueue < handle
-    properties
-        Time;
-        NumServers;
+    properties (SetAccess = public)
+        ArrivalRate = 0.5;
+        DepartureRate = 1/1.5;
+        NumServers = 1;
+        LogInterval = 1;
+    end
+    properties (SetAccess = private)
+        Time = 0;
         InterArrivalDist;
         ServiceDist;
         ServerAvailable;
@@ -9,25 +14,22 @@ classdef ServiceQueue < handle
         Events;
         Waiting;
         Served;
-        LogInterval;
         Log;
     end
     methods
-        function obj = ServiceQueue(Time, NumServers, ...
-                ArrivalRate, DepartureRate, LogInterval)
+        function obj = ServiceQueue(KWArgs)
             arguments
-                Time = 0.0;
-                NumServers = 1;
-                ArrivalRate = 0.5;
-                DepartureRate = 0.6;
-                LogInterval = 1.0;
+                KWArgs.?ServiceQueue;
             end
-            obj.Time = Time;
-            obj.NumServers = NumServers;
-            obj.InterArrivalDist = makedist("Exponential","mu",1/ArrivalRate);
-            obj.ServiceDist = makedist("Exponential","mu",1/DepartureRate);
-            obj.ServerAvailable = repelem(true, NumServers);
-            obj.Servers = cell([1, NumServers]);
+            fnames = fieldnames(KWArgs);
+            for ifield=1:length(fnames)
+                s = fnames{ifield};
+                obj.(s) = KWArgs.(s);
+            end
+            obj.InterArrivalDist = makedist("Exponential","mu",1/obj.ArrivalRate);
+            obj.ServiceDist = makedist("Exponential","mu",1/obj.DepartureRate);
+            obj.ServerAvailable = repelem(true, obj.NumServers);
+            obj.Servers = cell([1, obj.NumServers]);
             obj.Events = PriorityQueue({}, @(x) x.Time);
             obj.Waiting = {};
             obj.Served = {};
@@ -35,8 +37,12 @@ classdef ServiceQueue < handle
                 Size=[0, 4], ...
                 VariableNames={'Time', 'NWaiting', 'NInService', 'NServed'}, ...
                 VariableTypes={'double', 'int64', 'int64', 'int64'});
-            obj.LogInterval = LogInterval;
             schedule_event(obj, RecordToLog(0));
+        end
+        function obj = run_until(obj, MaxTime)
+            while obj.Time < MaxTime
+                handle_next_event(obj)
+            end
         end
         function schedule_event(obj, event)
             if event.Time < obj.Time
@@ -85,7 +91,7 @@ classdef ServiceQueue < handle
         end
         function advance(obj)
             % If someone is waiting
-            if size(obj.Waiting, 2) > 0
+            if length(obj.Waiting) > 0
                 % If a server is available
                 [x, j] = max(obj.ServerAvailable);
                 if x
@@ -102,10 +108,10 @@ classdef ServiceQueue < handle
             schedule_event(obj, RecordToLog(obj.Time + obj.LogInterval));
         end
         function record_log(obj)
-            NumWaiting = size(obj.Waiting, 2);
-            NumInService = obj.NumServers - sum(obj.ServerAvailable);
-            NumServed = size(obj.Served, 2);
-            obj.Log(end+1, :) = {obj.Time, NumWaiting, NumInService, NumServed};
+            NWaiting = length(obj.Waiting);
+            NInService = obj.NumServers - sum(obj.ServerAvailable);
+            NServed = length(obj.Served);
+            obj.Log(end+1, :) = {obj.Time, NWaiting, NInService, NServed};
         end
     end
 end

@@ -13,7 +13,7 @@ classdef PriorityQueue < handle
             obj.Elements = sort_by(Elements, SortFeature);
         end
         function n = size(obj)
-            n = size(obj.Elements, 2);
+            n = length(obj.Elements);
         end
         function x = is_empty(obj)
             x = size(obj) == 0; 
