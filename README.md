@@ -12,3 +12,5 @@ When a customer reaches the front of the waiting queue, they can be moved to a s
 Once a customer moves into a service slot, a `Departure` event for that customer is scheduled.
 There should be one `Departure` event scheduled for each busy service station.
 There is one `RecordToLog` scheduled at any time that represents the next time statistics will be added to the log table.
+
+FYI: The use of "queueing" rather than "queuing" is for consistency with the textbook.
