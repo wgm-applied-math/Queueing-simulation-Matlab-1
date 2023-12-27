@@ -3,3 +3,6 @@
 
 # Ignore Matlab autosave data
 *.asv
+
+# Ignore other Matlab stuff
+.MATLABDriveTag
