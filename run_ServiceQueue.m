@@ -1,35 +1,67 @@
+%% Script that runs a ServiceQueue simulation many times and plots a histogram
+
+%% Set up
+
+% Set up to run 100 samples of the queue.
 n_samples = 100;
+
+% Each sample is run up to a maximum time of 1000.
 max_time = 1000;
-NInSystem = [];
+
+% Record how many customers are in the system at the end of each sample.
+NInSystemSamples = cell([1, n_samples]);
 
 %% Run the queue simulation
 % The statistics seem to come out a little weird if the log interval is too
-% short, apparently because the log entries are not close enough to
-% independent. So the log interval should be long enough for several
-% arrival and departure events happen.
+% short, apparently because the log entries are not independent enough.  So
+% the log interval should be long enough for several arrival and departure
+% events happen.
 for sample_num = 1:n_samples
     q = ServiceQueue(LogInterval=10);
     q.schedule_event(Arrival(1, Customer(1)));
     run_until(q, max_time);
     % Pull out samples of the number of customers in the queue system
-    NInSystem = [NInSystem, q.Log.NWaiting + q.Log.NInService];
+    NInSystemSamples{sample_num} = q.Log.NWaiting + q.Log.NInService;
 end
 
-%% Make a picture
-hold on;
+% Join all the samples. "horzcat" is short for "horizontal concatenate",
+% meaning it joins a bunch of arrays horizontally, which in this case
+% results in one long row.
+NInSystem = horzcat(NInSystemSamples{:});
 
-% Start with a histogram.
+% MATLAB-ism: When you pull multiple items from a cell array, the result is
+% a "comma-separated list" rather than some kind of array.  Thus, the above
+% means
+%
+%    NInSystem = horzcat(NInSystemSamples{1}, NInSystemSamples{2}, ...)
+%
+% which horizontally concatenates all the lists of numbers in
+% NInSystemSamples.
+%
+% This is roughly equivalent to "splatting" in Python, which looks like
+% f(*args).
+
+%% Make a picture
+
+% Start with a histogram.  The result is an empirical PDF, that is, the
+% area of the bar at horizontal index n is proportional to the fraction of
+% samples for which there were n customers in the system.
 h = histogram(NInSystem, Normalization="probability", BinMethod="integers");
+
+% MATLAB-ism: Once you've created a picture, you can use "hold on" to cause
+% further plotting function to work with the same picture rather than
+% create a new one.
+hold on;
 
 % For comparison, plot the theoretical results for a M/M/1 queue.
 % The agreement isn't all that good unless you run for a long time, say
-% max_time = 10,000 units, and LogInterval is small, say 0.05.
-% The simulation will take a couple of minutes to run.
+% max_time = 10,000 units, and LogInterval is large, say 10.
 rho = q.ArrivalRate / q.DepartureRate;
 P0 = 1 - rho;
 nMax = 10;
 ns = 0:nMax;
-P = [P0];
+P = zeros([1, nMax+1]);
+P(1) = P0;
 for n = 1:nMax
     P(1+n) = P0 * rho^n;
 end

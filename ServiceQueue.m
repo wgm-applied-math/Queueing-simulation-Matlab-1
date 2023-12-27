@@ -1,7 +1,7 @@
 classdef ServiceQueue < handle
     % ServiceQueue Simulation object that keeps track of customer arrivals,
     % departures, and service.
-    
+
     properties (SetAccess = public)
         
         % ArrivalRate - Customers arrive according to a Poisson process.
@@ -165,6 +165,13 @@ classdef ServiceQueue < handle
 
         function handle_arrival(obj, arrival)
             % handle_arrival Handle an Arrival event.
+            %
+            % handle_arrival(obj, arrival) - Handle an Arrival event.  Add
+            % the Customer in the arrival object to the queue's internal
+            % state.  Create a new Arrival event and add it to the event
+            % list.  In general, there should be exactly one Arrival in the
+            % event list at a time, representing the arrival of the next
+            % customer.
 
             % Record the current time in the Customer object as its arrival
             % time.
@@ -294,3 +301,41 @@ classdef ServiceQueue < handle
         end
     end
 end
+ 
+% MATLAB-ism: The notation 
+% 
+%   classdef ServiceQueue < handle
+% 
+% makes ServiceQueue a subclass of handle, which means that this is a
+% "handle" class, so instances have "handle" semantics. When you assign an
+% instance to a variable, as in
+%
+%   q1 = ServiceQueue()
+%   q2 = q1
+%
+% a handle (or reference) to the object is assigned rather than an
+% independent copy.  That is, q1 and q2 are handles to the same object.
+% Changes made using q1 will affect q2, and vice-versa.
+%
+% In contrast, classes that aren't derived from handle are "value" classes.
+% When you assign an instance to a variable, an independent copy is made.
+% This is MATLAB's usual array behavior:
+%
+%  u = [1,2,3] v = u v(1) = 10
+%
+% After the above, u is still [1,2,3] and v is [10,2,3] because the
+% assignment v = u copies the array.  The change to v(1) doesn't affect the
+% copy in u.
+%
+% Importantly, copies of value objects are made when they are passed to
+% functions.
+%
+% Handle semantics are used for this simulation, so that methods are able
+% to change the state of a ServiceQueue object.  That is, something like
+%
+%  q = ServiceQueue() handle_next_event(q)
+%
+% creates a ServiceQueue object and calls a method that changes its state.
+% If ServiceQueue was a value class, the instance would be copied when
+% passed to the handle_next_event method, and no changes could be made to
+% the copy stored in the variable q.
