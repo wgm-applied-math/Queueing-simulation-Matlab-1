@@ -1,4 +1,5 @@
-%% Script that runs a ServiceQueue simulation many times and plots a histogram
+% Script that runs a ServiceQueue simulation many times and plots a
+% histogram
 
 %% Set up
 
@@ -12,6 +13,7 @@ max_time = 1000;
 NInSystemSamples = cell([1, n_samples]);
 
 %% Run the queue simulation
+
 % The statistics seem to come out a little weird if the log interval is too
 % short, apparently because the log entries are not independent enough.  So
 % the log interval should be long enough for several arrival and departure

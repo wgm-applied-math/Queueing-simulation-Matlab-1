@@ -1,5 +1,6 @@
 classdef RecordToLog < Event
-    % RecordToLog Subclass of Event that causes the event queue to record a log entry.
+    % RecordToLog Subclass of Event that causes the event queue to record a
+    % log entry.
 
     methods
         function varargout = visit(obj, other)
