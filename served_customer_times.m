@@ -7,7 +7,8 @@ function times = served_customer_times(q)
 % row vector times.
 
 arguments
-    q ServiceQueue
+    % q - The ServiceQueue to analyze.
+    q ServiceQueue;
 end
 
 num_customers_served = size(q.Served, 2);
@@ -19,3 +20,13 @@ for j = 1:num_customers_served
 end
 
 end
+
+% MATLAB-ism: The "arguments" block in the above definition asserts that
+% q is supposed to be an instance of ServiceQueue, or some subclass of
+% ServiceQueue.  If you try to call this function on some other kind of
+% object, you'll get an error message.  MATLAB is dynamically typed, so
+% type assertions aren't generally required.  I've included one here to
+% demonstrate how it's done.  The main use of them is to assist in tracking
+% down bugs, like passing the wrong thing to a function or passing them in
+% the wrong order.  Type assertions also assist in documenting what a
+% function does.
