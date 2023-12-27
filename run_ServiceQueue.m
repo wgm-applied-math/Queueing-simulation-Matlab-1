@@ -20,14 +20,17 @@ for sample_num = 1:n_samples
     q = ServiceQueue(LogInterval=10);
     q.schedule_event(Arrival(1, Customer(1)));
     run_until(q, max_time);
-    % Pull out samples of the number of customers in the queue system
+    % Pull out samples of the number of customers in the queue system. Each
+    % sample run of the queue results in a column of samples of customer
+    % counts, because tables like q.Log allow easy extraction of whole
+    % columns like this.
     NInSystemSamples{sample_num} = q.Log.NWaiting + q.Log.NInService;
 end
 
-% Join all the samples. "horzcat" is short for "horizontal concatenate",
-% meaning it joins a bunch of arrays horizontally, which in this case
-% results in one long row.
-NInSystem = horzcat(NInSystemSamples{:});
+% Join all the samples. "vertcat" is short for "vertical concatenate",
+% meaning it joins a bunch of arrays vertically, which in this case results
+% in one tall column.
+NInSystem = vertcat(NInSystemSamples{:});
 
 % MATLAB-ism: When you pull multiple items from a cell array, the result is
 % a "comma-separated list" rather than some kind of array.  Thus, the above
