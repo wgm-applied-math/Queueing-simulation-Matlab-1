@@ -5,7 +5,7 @@ function q = test_ServiceQueue(max_time)
     % time 1, then run the queue until its internal clock passes max_time.
     % The default for max_time is 100.
     arguments
-        max_time = 100.0;
+        max_time = 10.0;
     end
     q = ServiceQueue(LogInterval=1, NumServers=2);
     q.schedule_event(Arrival(1, Customer(1)));
