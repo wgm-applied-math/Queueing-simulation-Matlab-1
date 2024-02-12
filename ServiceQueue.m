@@ -192,31 +192,42 @@ classdef ServiceQueue < handle
             NTotal = NWaiting+NInService;
             if NTotal == 0
                 obj.Waiting{end+1} = c;
-            elseif NTotal == 1
+            
+                % Condence if statement to process NTotal 1 to 3
+            elseif NTotal <= 3
                 randomnum = rand();
-                    probability = 1/3;
-                    if randomnum <= probability
-                        obj.Balking{end+1} = c;
-                    else
-                        obj.Waiting{end+1} = c;
-                    end
-            elseif NTotal == 2
-                randomnum = rand();
-                    probability = 2/3;
-                    if randomnum <= probability
-                        obj.Balking{end+1} = c;
-                    else
-                        obj.Waiting{end+1} = c;
-                    end 
-            elseif NTotal == 3
-                randomnum = rand();
-                    probability = 3/3;
-                    if randomnum <= probability
-                        obj.Balking{end+1} = c;
-                    else
-                        obj.Waiting{end+1} = c;
-                    end
-            end
+                probability = NTotal/3;
+
+                 if randomnum <= probability
+                    obj.Balking{end+1} = c;
+                 else
+                    obj.Waiting{end+1} = c;
+                 end
+            end 
+           
+          
+                
+                       
+            % 
+            %             obj.Waiting{end+1} = c;
+            %         end
+            % elseif NTotal == 2
+            %     randomnum = rand();
+            %         probability = 2/3;
+            %         if randomnum <= probability
+            %             obj.Balking{end+1} = c;
+            %         else
+            %             obj.Waiting{end+1} = c;
+            %         end 
+            % elseif NTotal == 3
+            %     randomnum = rand();
+            %         probability = 3/3;
+            %         if randomnum <= probability
+            %             obj.Balking{end+1} = c;
+            %         else
+            %             obj.Waiting{end+1} = c;
+            %         end
+    
  
             % Construct the next Customer that will arrive.
             % Its Id is one higher than the one that just arrived.
