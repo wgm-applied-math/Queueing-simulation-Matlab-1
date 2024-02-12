@@ -15,7 +15,7 @@ classdef ServiceQueue < handle
         DepartureRate = 1/1.5;
 
         % NumServers - How many identical serving stations are available.
-        NumServers = 1;
+        NumServers = 2;
 
         % LogInterval - Approximately how many time units between log
         % entries.  Log events are scheduled so that when one log entry is
@@ -194,9 +194,9 @@ classdef ServiceQueue < handle
                 obj.Waiting{end+1} = c;
             
                 % Condence if statement to process NTotal 1 to 3
-            elseif NTotal <= 3
+            elseif NTotal <= 4
                 randomnum = rand();
-                probability = NTotal/3;
+                probability = NTotal/4;
 
                  if randomnum <= probability
                     obj.Balking{end+1} = c;
