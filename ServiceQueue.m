@@ -187,32 +187,37 @@ classdef ServiceQueue < handle
 
             % The Customer is appended to the list of waiting customers.
             %PUT IN IF STATEMENT FOR CUSTOMER MOVEMENT, ADD BALK LIST
-            obj.Waiting{end+1} = c;
-            if obj.ServerAvailable == false;
-                if size(obj.Waiting) == 1;
-                    random.num = rand();
+            NWaiting = length(obj.Waiting);
+            NInService = obj.NumServers - sum(obj.ServerAvailable);
+            NTotal = NWaiting+NInService;
+            if NTotal == 0
+                obj.Waiting{end+1} = c;
+            elseif NTotal == 1
+                randomnum = rand();
                     probability = 1/3;
-                    if random.num <= probability;
+                    if randomnum <= probability
                         obj.Balking{end+1} = c;
+                    else
+                        obj.Waiting{end+1} = c;
                     end
-                end
-                if size(obj.Waiting) == 2;
-                    random.num = rand();
+            elseif NTotal == 2
+                randomnum = rand();
                     probability = 2/3;
-                    if random.num <= probability
+                    if randomnum <= probability
                         obj.Balking{end+1} = c;
-                    end
-                end
-                if size(obj.Waiting) == 3;
-                     random.num = rand();
+                    else
+                        obj.Waiting{end+1} = c;
+                    end 
+            elseif NTotal == 3
+                randomnum = rand();
                     probability = 3/3;
-                    if random.num <= probability;
+                    if randomnum <= probability
                         obj.Balking{end+1} = c;
+                    else
+                        obj.Waiting{end+1} = c;
                     end
-                end
             end
-
-
+ 
             % Construct the next Customer that will arrive.
             % Its Id is one higher than the one that just arrived.
             next_customer = Customer(c.Id + 1);
