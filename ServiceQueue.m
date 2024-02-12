@@ -63,6 +63,8 @@ classdef ServiceQueue < handle
         % Servers.
         Waiting;
 
+        Balking;
+
         % Served - Cell array row vector of Customer objects. Initially
         % empty.  When a Customer's service is complete, the Customer
         % object is moved from its slot in Servers to the end of Served.
@@ -112,6 +114,7 @@ classdef ServiceQueue < handle
             obj.Servers = cell([1, obj.NumServers]);
             obj.Events = PriorityQueue({}, @(x) x.Time);
             obj.Waiting = {};
+            obj.Balking = {};
             obj.Served = {};
             obj.Log = table( ...
                 Size=[0, 4], ...
@@ -183,7 +186,32 @@ classdef ServiceQueue < handle
             c.ArrivalTime = obj.Time;
 
             % The Customer is appended to the list of waiting customers.
+            %PUT IN IF STATEMENT FOR CUSTOMER MOVEMENT, ADD BALK LIST
             obj.Waiting{end+1} = c;
+            if obj.ServerAvailable == false;
+                if size(obj.Waiting) == 1;
+                    random.num = rand();
+                    probability = 1/3;
+                    if random.num <= probability;
+                        obj.Balking{end+1} = c;
+                    end
+                end
+                if size(obj.Waiting) == 2;
+                    random.num = rand();
+                    probability = 2/3;
+                    if random.num <= probability
+                        obj.Balking{end+1} = c;
+                    end
+                end
+                if size(obj.Waiting) == 3;
+                     random.num = rand();
+                    probability = 3/3;
+                    if random.num <= probability;
+                        obj.Balking{end+1} = c;
+                    end
+                end
+            end
+
 
             % Construct the next Customer that will arrive.
             % Its Id is one higher than the one that just arrived.
