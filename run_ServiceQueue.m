@@ -85,3 +85,4 @@ fig.Units = 'inches';
 screenposition = fig.Position;
 fig.PaperPosition = [0 0 screenposition(3:4)];
 fig.PaperSize = [screenposition(3:4)];
+exportgraphics(fig, "Service queue histogram.pdf");
