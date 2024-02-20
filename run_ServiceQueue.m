@@ -77,11 +77,5 @@ for n = 1:nMax
 end
 plot(ax, ns, P, 'o', MarkerEdgeColor='k', MarkerFaceColor='r');
 
-% This sets some paper-related properties of the figure so that you can
-% save it as a PDF and it doesn't fill a whole page.
-% gcf is "get current figure handle"
-% See https://stackoverflow.com/a/18868933/2407278
-fig.Units = 'inches';
-screenposition = fig.Position;
-fig.PaperPosition = [0 0 screenposition(3:4)];
-fig.PaperSize = [screenposition(3:4)];
+% Easiest way I've found to save a figure as a PDF file
+exportgraphics(fig, "Service queue histogram.pdf");
