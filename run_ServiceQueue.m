@@ -20,7 +20,10 @@ NInSystemSamples = cell([NSamples, 1]);
 % the log interval should be long enough for several arrival and departure
 % events happen.
 for sample_num = 1:NSamples
-    q = ServiceQueue(LogInterval=10);
+    q = ServiceQueue( ...
+        ArrivalRate=1/2, ...
+        DepartureRate=1/1.5, ...
+        LogInterval=10);
     q.schedule_event(Arrival(1, Customer(1)));
     run_until(q, MaxTime);
     % Pull out samples of the number of customers in the queue system. Each
