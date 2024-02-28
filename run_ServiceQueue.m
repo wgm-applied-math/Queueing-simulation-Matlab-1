@@ -1,27 +1,28 @@
-% Script that runs a ServiceQueue simulation many times and plots a
-% histogram
+%% Run samples of the ServiceQueue simulation
+% 
+% Collect statistics and plot histograms along the way.
 
 %% Set up
 
 % Set up to run 100 samples of the queue.
-n_samples = 100;
+NSamples = 100;
 
 % Each sample is run up to a maximum time of 1000.
-max_time = 1000;
+MaxTime = 1000;
 
 % Record how many customers are in the system at the end of each sample.
-NInSystemSamples = cell([1, n_samples]);
+NInSystemSamples = cell([NSamples, 1]);
 
-%% Run the queue simulation
+%% Run simulation samples
 
 % The statistics seem to come out a little weird if the log interval is too
 % short, apparently because the log entries are not independent enough.  So
 % the log interval should be long enough for several arrival and departure
 % events happen.
-for sample_num = 1:n_samples
+for sample_num = 1:NSamples
     q = ServiceQueue(LogInterval=10);
     q.schedule_event(Arrival(1, Customer(1)));
-    run_until(q, max_time);
+    run_until(q, MaxTime);
     % Pull out samples of the number of customers in the queue system. Each
     % sample run of the queue results in a column of samples of customer
     % counts, because tables like q.Log allow easy extraction of whole
@@ -46,7 +47,7 @@ NInSystem = vertcat(NInSystemSamples{:});
 % This is roughly equivalent to "splatting" in Python, which looks like
 % f(*args).
 
-%% Make a picture
+%% Make pictures
 
 % Make a figure with one set of axes.
 fig = figure();

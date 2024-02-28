@@ -61,18 +61,23 @@ classdef ServiceQueue < handle
         % vector.  When a serving station is available, the first Customer
         % is removed from Waiting and moved to the corresponding slot in
         % Servers.
-        Waiting;
+        Waiting = {};
 
         % Served - Cell array row vector of Customer objects. Initially
         % empty.  When a Customer's service is complete, the Customer
         % object is moved from its slot in Servers to the end of Served.
-        Served;
+        Served = {};
 
-        % Log - Table of log entries. Its columns are 'Time', 'NWaiting',
-        % 'NInService', 'NServed', meaning: time, how many customers are
-        % currently waiting, how many are currently being served, and how
-        % many have been served.
-        Log;
+        % Log - Table of log entries. Its columns are:
+        % * Time - Time of the log entry
+        % * NWaiting - How many customers are currently waiting
+        % * NInService - How many are currently being served
+        % * NServed -  How many have been served
+        Log = table(Size=[0, 4], ...
+            VariableNames=...
+            {'Time', 'NWaiting', 'NInService', 'NServed'}, ...
+            VariableTypes=...
+            {'double', 'int64', 'int64', 'int64'});
     
     end
 
@@ -110,15 +115,8 @@ classdef ServiceQueue < handle
                 makedist("Exponential", mu=1/obj.DepartureRate);
             obj.ServerAvailable = repelem(true, obj.NumServers);
             obj.Servers = cell([1, obj.NumServers]);
+            % Events has to be initialized in the constructor.
             obj.Events = PriorityQueue({}, @(x) x.Time);
-            obj.Waiting = {};
-            obj.Served = {};
-            obj.Log = table( ...
-                Size=[0, 4], ...
-                VariableNames=...
-                    {'Time', 'NWaiting', 'NInService', 'NServed'}, ...
-                VariableTypes=...
-                    {'double', 'int64', 'int64', 'int64'});
 
             % The first event is to record the state at time 0 to the log.
             schedule_event(obj, RecordToLog(0));
@@ -130,7 +128,7 @@ classdef ServiceQueue < handle
             % obj = run_until(obj, MaxTime) Repeatedly handle the next
             % event until the current time is at least MaxTime.
 
-            while obj.Time < MaxTime
+            while obj.Time <= MaxTime
                 handle_next_event(obj)
             end
         end
@@ -138,9 +136,8 @@ classdef ServiceQueue < handle
         function schedule_event(obj, event)
             % schedule_event Add an object to the event queue.
 
-            if event.Time < obj.Time
-                error('event happens in the past');
-            end
+            assert(event.Time >= obj.Time, ...
+                "Event happens in the past");
             push(obj.Events, event);
         end
 
@@ -148,13 +145,11 @@ classdef ServiceQueue < handle
             % handle_next_event Pop the next event and use the visitor
             % mechanism on it to do something interesting.
 
-            if is_empty(obj.Events)
-                error('no unhandled events');
-            end
+            assert(~is_empty(obj.Events), ...
+                "No unhandled events");
             event = pop_first(obj.Events);
-            if obj.Time > event.Time
-                error('event happened in the past');
-            end
+            assert(event.Time >= obj.Time, ...
+                "Event happens in the past");
 
             % Update the current time to match the event that just
             % happened.
@@ -208,6 +203,11 @@ classdef ServiceQueue < handle
 
             % This is which service station experiences the departure.
             j = departure.ServerIndex;
+
+            assert(~obj.ServerAvailable(j), ...
+                "Service station j must be occupied");
+            assert(obj.Servers{j} ~= false, ...
+                "There must be a customer in service station j");
             customer = obj.Servers{j};
 
             % Record the event time as the departure time for this
