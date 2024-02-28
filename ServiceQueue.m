@@ -21,7 +21,7 @@ classdef ServiceQueue < handle
         % entries.  Log events are scheduled so that when one log entry is
         % recorded, the next is scheduled for the curren time plus this
         % interval.
-        LogInterval = 1;
+        LogInterval = 10;
     
     end
 
@@ -118,8 +118,7 @@ classdef ServiceQueue < handle
             % Events has to be initialized in the constructor.
             obj.Events = PriorityQueue({}, @(x) x.Time);
 
-            % The first event is to record the state at time 0 to the log.
-            schedule_event(obj, RecordToLog(0));
+            schedule_event(obj, RecordToLog(obj.LogInterval));
         end
 
         function obj = run_until(obj, MaxTime)
