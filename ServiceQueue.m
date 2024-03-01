@@ -292,6 +292,16 @@ classdef ServiceQueue < handle
             schedule_event(obj, RecordToLog(obj.Time + obj.LogInterval));
         end
 
+        function n = count_customers_in_system(obj)
+            % count_customers_in_system Return how many customers are
+            % currently in the system, including those waiting and those
+            % being served.
+
+            NWaiting = length(obj.Waiting);
+            NInService = obj.NumServers - sum(obj.ServerAvailable);
+            n = NWaiting + NInService;
+        end
+
         function record_log(obj)
             % record_log Record a summary of the service queue state.
 
