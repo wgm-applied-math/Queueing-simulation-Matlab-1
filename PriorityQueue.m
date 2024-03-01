@@ -7,7 +7,7 @@ classdef PriorityQueue < handle
     % built into MATLAB, I'm just using a cell array and sorting it each
     % time a new element is inserted or removed.
 
-    properties (GetAccess=private)
+    properties (GetAccess = private)
         Elements = {};
         SortFeature = @(x) x;
     end
@@ -60,6 +60,11 @@ classdef PriorityQueue < handle
             v = obj.Elements;
             v{end+1} = element;
             obj.Elements = sort_by(v, obj.SortFeature);
+        end
+        function remove_if(obj, test)
+            % remove_if - Remove items for which test() returns true.
+            to_remove = cellfun(test, obj.Elements);
+            obj.Elements(to_remove) = [];
         end
     end
 end
