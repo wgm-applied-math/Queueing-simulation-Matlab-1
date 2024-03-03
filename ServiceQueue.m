@@ -70,12 +70,12 @@ classdef ServiceQueue < handle
 
         % Log - Table of log entries. Its columns are:
         % * Time - Time of the log entry
-        % * NWaiting - How many customers are currently waiting
-        % * NInService - How many are currently being served
-        % * NServed -  How many have been served
+        % * NumWaiting - How many customers are currently waiting
+        % * NumInService - How many are currently being served
+        % * NumServed -  How many have been served
         Log = table(Size=[0, 4], ...
             VariableNames=...
-            {'Time', 'NWaiting', 'NInService', 'NServed'}, ...
+            {'Time', 'NumWaiting', 'NumInService', 'NumServed'}, ...
             VariableTypes=...
             {'double', 'int64', 'int64', 'int64'});
     
@@ -297,20 +297,20 @@ classdef ServiceQueue < handle
             % currently in the system, including those waiting and those
             % being served.
 
-            NWaiting = length(obj.Waiting);
-            NInService = obj.NumServers - sum(obj.ServerAvailable);
-            n = NWaiting + NInService;
+            NumWaiting = length(obj.Waiting);
+            NumInService = obj.NumServers - sum(obj.ServerAvailable);
+            n = NumWaiting + NumInService;
         end
 
         function record_log(obj)
             % record_log Record a summary of the service queue state.
 
-            NWaiting = length(obj.Waiting);
-            NInService = obj.NumServers - sum(obj.ServerAvailable);
-            NServed = length(obj.Served);
+            NumWaiting = length(obj.Waiting);
+            NumInService = obj.NumServers - sum(obj.ServerAvailable);
+            NumServed = length(obj.Served);
 
             % MATLAB-ism: This is how to add a row to the end of a table.
-            obj.Log(end+1, :) = {obj.Time, NWaiting, NInService, NServed};
+            obj.Log(end+1, :) = {obj.Time, NumWaiting, NumInService, NumServed};
         end
     end
 end
