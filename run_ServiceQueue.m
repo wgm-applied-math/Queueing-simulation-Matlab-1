@@ -20,18 +20,15 @@ mu = 1/1.5;
 % Number of serving stations
 s = 1;
 
-% Set up to run 100 samples of the queue.
+% Run 100 samples of the queue.
 NumSamples = 100;
 
 % Each sample is run up to a maximum time of 1000.
 MaxTime = 1000;
 
-% Record how many customers are in the system at the end of each sample.
-NumInSystemSamples = cell([NumSamples, 1]);
-
 %% Numbers from theory for M/M/1 queue
 
-% Compute |(1+n) = $P_n$ = probability of finding the system in state $n$
+% Compute P(1+n) = $P_n$ = probability of finding the system in state $n$
 % in the long term.
 % Note that this calculation assumes s=1.
 rho = lambda / mu;
@@ -40,10 +37,15 @@ nMax = 10;
 P = zeros([1, nMax+1]);
 P(1) = P0;
 for n = 1:nMax
-    P(1+n) = P0 * rho^n / d;
+    P(1+n) = P0 * rho^n;
 end
 
 %% Run simulation samples
+
+% This is the most time consuming calculation in the script, so let's put
+% it in its own section.  That way, we can run it once, and more easlily
+% run the faster calculations multiple times as we add features to this
+% script.
 
 % Reset the random number generator.  This causes MATLAB to use the same
 % sequence of pseudo-random numbers each time you run the script, which
@@ -52,11 +54,15 @@ end
 % random numbers to be truly unpredictable and you wouldn't do this.
 rng("default");
 
+% We'll store our queue simulation objects in this list.
+QSamples = cell([NumSamples, 1]);
+
 % The statistics seem to come out a little weird if the log interval is too
 % short, because the log entries are not independent enough.  So the log
 % interval should be long enough for several arrival and departure events
 % happen.
-for sample_num = 1:NumSamples
+for SampleNum = 1:NumSamples
+    fprintf("Working on sample %d\n", SampleNum);
     q = ServiceQueue( ...
         ArrivalRate=lambda, ...
         DepartureRate=mu, ...
@@ -64,16 +70,36 @@ for sample_num = 1:NumSamples
         LogInterval=10);
     q.schedule_event(Arrival(1, Customer(1)));
     run_until(q, MaxTime);
+    QSamples{SampleNum} = q;
+end
+
+%% Collect statistics
+
+% Count how many customers are in the system at each log entry for each
+% sample run.  There are two ways to do this.  You only have to do one of
+% them.
+
+% Option one: Use a for loop.
+NumInSystemSamples = cell([NumSamples, 1]);
+for SampleNum = 1:NumSamples
     % Pull out samples of the number of customers in the queue system. Each
     % sample run of the queue results in a column of samples of customer
     % counts, because tables like q.Log allow easy extraction of whole
     % columns like this.
-    NumInSystemSamples{sample_num} = q.Log.NumWaiting + q.Log.NumInService;
+    NumInSystemSamples{SampleNum} = q.Log.NumWaiting + q.Log.NumInService;
 end
 
-% Join all the samples. "vertcat" is short for "vertical concatenate",
-% meaning it joins a bunch of arrays vertically, which in this case results
-% in one tall column.
+% Option two: Map a function over the cell array of SericeQueue objects.
+% The option UniformOutput=false tells cellfun to produce a cell array
+% rather than a numerical array.
+NumInSystemSamples = cellfun( ...
+    @(q) q.Log.NumWaiting + q.Log.NumInService, ...
+    QSamples, ...
+    UniformOutput=false);
+
+% Join numbers from all sample runs. "vertcat" is short for "vertical
+% concatenate", meaning it joins a bunch of arrays vertically, which in
+% this case results in one tall column.
 NumInSystem = vertcat(NumInSystemSamples{:});
 
 % MATLAB-ism: When you pull multiple items from a cell array, the result is
@@ -92,7 +118,7 @@ NumInSystem = vertcat(NumInSystemSamples{:});
 
 % Print out mean number of customers in the system.
 meanNumInSystem = mean(NumInSystem);
-fprintf("Mean number in system: %f", meanNumInSystem);
+fprintf("Mean number in system: %f\n", meanNumInSystem);
 
 % Make a figure with one set of axes.
 fig = figure();
