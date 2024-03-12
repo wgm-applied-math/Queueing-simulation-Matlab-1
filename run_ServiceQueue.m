@@ -45,6 +45,13 @@ end
 
 %% Run simulation samples
 
+% Reset the random number generator.  This causes MATLAB to use the same
+% sequence of pseudo-random numbers each time you run the script, which
+% means the results come out exactly the same.  This is a good idea for
+% testing purposes.  Under other circumstances, you probably want the
+% random numbers to be truly unpredictable and you wouldn't do this.
+rng("default");
+
 % The statistics seem to come out a little weird if the log interval is too
 % short, because the log entries are not independent enough.  So the log
 % interval should be long enough for several arrival and departure events
