@@ -237,8 +237,11 @@ t = tiledlayout(fig,1,1);
 ax = nexttile(t);
 
 % This time, the data is a list of real numbers, not integers.
-% The option BinEdges=0:0.5:60 means to use bins (0, 0.5), (0.5, 1.0), ...
-h = histogram(ax, TimeInSystem, Normalization="probability", BinEdges=0:0.5:60);
+% The option BinWidth=0.5 means to use bins of width 0.5, and choose the
+% left-most and right-most edges automatically.
+% Instead, you could specify the left-most and right-most edges explicitly.
+% Using BinEdges=0:0.5:60 means to use bins (0, 0.5), (0.5, 1.0), ...
+h = histogram(ax, TimeInSystem, Normalization="probability", BinWidth=0.5);
 
 % Add titles and labels and such.
 title(ax, "Time in the system");
