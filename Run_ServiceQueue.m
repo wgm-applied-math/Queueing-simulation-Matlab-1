@@ -11,8 +11,8 @@ lambda = 10;
 mu = 12;
 %[text] Number of serving stations
 s = 1;
-%[text] Run 100 samples of the queue.
-NumSamples = 100;
+%[text] Run many samples of the queue.
+NumSamples = 20;
 %[text] Each sample is run up to a maximum time.
 MaxTime = 96;
 %[text] Make a log entry every so often
@@ -37,7 +37,12 @@ rng("default");
 QSamples = cell([NumSamples, 1]);
 %[text] The statistics come out weird if the log interval is too short, because the log entries are not independent enough.  So the log interval should be long enough for several arrival and departure events happen.
 for SampleNum = 1:NumSamples
-    fprintf("Working on sample %d\n", SampleNum);
+    if mod(SampleNum, 10) == 0
+        fprintf("%d ", SampleNum);
+    end
+    if mod(SampleNum, 100) == 0
+        fprintf("\n");
+    end
     q = ServiceQueue( ...
         ArrivalRate=lambda, ...
         DepartureRate=mu, ...
@@ -94,8 +99,8 @@ xlabel(ax, "Count");
 ylabel(ax, "Probability");
 legend(ax, "simulation", "theory");
 %[text] Set ranges on the axes. MATLAB's plotting functions do this automatically, but when you need to compare two sets of data, it's a good idea to use the same ranges on the two pictures.  To start, you can let MATLAB choose the ranges automatically, and just know that it might choose very different ranges for different sets of data.  Once you're certain the picture content is correct, choose an x range and a y range that gives good results for all sets of data.  The final choice of ranges is a matter of some trial and error.  You generally have to do these commands *after* calling `plot` and `histogram`.
-%[text] This sets the vertical axis to go from $0$ to $0.3$.
-ylim(ax, [0, 0.3]);
+%[text] This sets the vertical axis to go from $0$ to $0.2$.
+ylim(ax, [0, 0.2]);
 %[text] This sets the horizontal axis to go from $-1$ to $21$.  The histogram will use bins $(-0.5, 0.5), (0.5, 1.5), \\dots$ so this leaves some visual breathing room on the left.
 xlim(ax, [-1, 21]);
 %[text] MATLAB-ism: You have to wait a couple of seconds for those settings to take effect or `exportgraphics` will screw up the margins.
